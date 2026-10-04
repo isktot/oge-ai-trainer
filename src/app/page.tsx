@@ -1,24 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-
-// Интерфейсы для типов данных
-interface Criterion {
-  code: string;
-  name: string;
-  maxScore: number;
-}
-
-interface Task {
-  id: string;
-  subject: string;
-  title: string;
-  prompt: string;
-  maxScore: number;
-  criteria: Criterion[];
-  goodExample: string;
-  badExample: string;
-}
+import { TASKS, Task } from '@/data/tasks'; // Подключаем задания из отдельного файла
 
 interface EvaluationResult {
   totalScore: number;
@@ -35,42 +18,31 @@ interface EvaluationResult {
   recommendations: string;
 }
 
-// Банк тестовых заданий ОГЭ
-const TASKS: Task[] = [
-    {
-      id: 'ru-13.3',
-      subject: 'Русский язык',
-      title: 'Задание 13.3 — Сочинение-рассуждение',
-      prompt: 'Напишите сочинение-рассуждение на тему "Что такое доброта?". Дайте определение понятию ДОБРОТА и прокомментируйте его. Приведите 2 примера-аргумента (из текста и из жизненного/читательского опыта).',
-      maxScore: 7,
-      criteria: [
-        { code: 'СК1', name: 'Толкование значения слова / Тезис', maxScore: 1 },
-        { code: 'СК2', name: 'Наличие примеров-аргументов', maxScore: 3 },
-        { code: 'СК3', name: 'Смысловая цельность и связность', maxScore: 2 },
-        { code: 'СК4', name: 'Композиционная стройность', maxScore: 1 },
-      ],
-      goodExample: 'Доброта — это душевное качество человека, которое проявляется в заботе, бескорыстной помощи и сострадании к окружающим. Добрый человек совершает поступки не ради выгоды, а по зову сердца.\n\nВ приведенном тексте автор показывает доброту на примере героя, который делится последним хлебом. Это подчеркивает его милосердие.\n\nВ жизни я тоже встречал примеры доброты. Наш сосед помог бездомной собаке найти дом. Таким образом, доброта делает мир лучше.',
-      badExample: 'Доброта — это когда ты помогаешь другим людям и ничего не просишь взамен. Навряд ли без доброты мир бы выжил. В тексте автору тоже помогают люди. Я тоже один раз перевел бабушку через дорогу и она дала мне конфету.',
-    },
-  {
-    id: 'math-21',
-    subject: 'Математика',
-    title: 'Задание 21 — Алгебраическое уравнение (2-я часть)',
-    prompt: 'Решите уравнение: x⁴ = (2x - 3)²',
-    maxScore: 2,
-    criteria: [
-      { code: 'М1', name: 'Правильность и полнота решения', maxScore: 2 },
-    ],
-    goodExample: 'x⁴ - (2x - 3)² = 0\n(x² - (2x - 3))(x² + (2x - 3)) = 0\n1) x² - 2x + 3 = 0, D = 4 - 12 = -8 < 0 (корней нет)\n2) x² + 2x - 3 = 0, D = 4 + 12 = 16\nx1 = (-2 + 4)/2 = 1\nx2 = (-2 - 4)/2 = -3\nОтвет: -3; 1.',
-    badExample: 'Извлечем корень из обеих частей:\nx² = 2x - 3\nx² - 2x + 3 = 0\nD = -8, решений нет.\nОтвет: нет решений.',
-  }
-];
-
 export default function OgeTrainerPage() {
+  const [selectedSubject, setSelectedSubject] = useState<'Русский язык' | 'Математика'>('Русский язык');
   const [selectedTask, setSelectedTask] = useState<Task>(TASKS[0]);
   const [inputText, setInputText] = useState<string>('');
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
+
+  const filteredTasks = TASKS.filter((t) => t.subject === selectedSubject);
+
+  const handleSubjectChange = (subject: 'Русский язык' | 'Математика') => {
+    setSelectedSubject(subject);
+    const firstTask = TASKS.find((t) => t.subject === subject) || TASKS[0];
+    setSelectedTask(firstTask);
+    setEvaluation(null);
+    setInputText('');
+  };
+
+  const handleRandomTask = () => {
+    const available = filteredTasks.filter((t) => t.id !== selectedTask.id);
+    const pool = available.length > 0 ? available : filteredTasks;
+    const random = pool[Math.floor(Math.random() * pool.length)];
+    setSelectedTask(random);
+    setEvaluation(null);
+    setInputText('');
+  };
 
   const handleEvaluate = async () => {
     if (!inputText.trim()) {
@@ -108,50 +80,89 @@ export default function OgeTrainerPage() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-4 md:p-8 font-sans">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-6">
         
-        {/* Шапка сайта */}
+        {/* Шапка */}
         <header className="border-b border-slate-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <span className="bg-blue-600/20 text-blue-400 text-xs font-semibold px-2.5 py-1 rounded border border-blue-500/30">
-              НОУ 10 Класс • ИИ-Тренажёр
+              НОУ 10 Класс • ИИ-Тренажёр ОГЭ
             </span>
             <h1 className="text-3xl font-bold mt-2 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              Подготовка к ОГЭ с ИИ-Экспертом
+              Экспертная проверка ответов ОГЭ
             </h1>
           </div>
-          <div className="flex gap-2">
-            {TASKS.map((t) => (
+
+          <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700/60">
+            {(['Русский язык', 'Математика'] as const).map((subject) => (
               <button
-                key={t.id}
-                onClick={() => {
-                  setSelectedTask(t);
-                  setEvaluation(null);
-                  setInputText('');
-                }}
+                key={subject}
+                onClick={() => handleSubjectChange(subject)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  selectedTask.id === t.id
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
+                  selectedSubject === subject
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {t.subject} ({t.id})
+                {subject}
               </button>
             ))}
           </div>
         </header>
 
-        {/* Основной блок */}
+        {/* Переключатель заданий */}
+        <div className="bg-slate-800/40 border border-slate-700/50 p-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex-1 space-y-1">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Выберите задание ({filteredTasks.length}):
+            </label>
+            <select
+              value={selectedTask.id}
+              onChange={(e) => {
+                const found = TASKS.find((t) => t.id === e.target.value);
+                if (found) {
+                  setSelectedTask(found);
+                  setEvaluation(null);
+                  setInputText('');
+                }
+              }}
+              className="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+            >
+              {filteredTasks.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={handleRandomTask}
+            className="sm:self-end bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium px-4 py-2 rounded-lg border border-slate-600 transition flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            <span>🎲</span>
+            <span>Случайное задание</span>
+          </button>
+        </div>
+
+        {/* Рабочая область */}
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* Левая колонка: Задание и Поле ввода */}
           <section className="space-y-4">
             <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 space-y-3">
-              <h2 className="text-lg font-semibold text-blue-400">{selectedTask.title}</h2>
-              <p className="text-sm text-slate-300 leading-relaxed">{selectedTask.prompt}</p>
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-blue-400">{selectedTask.title}</h2>
+                <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">
+                  Макс. балл: {selectedTask.maxScore}
+                </span>
+              </div>
+
+              <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto pr-2 custom-scrollbar bg-slate-950/40 p-3 rounded-lg border border-slate-800">
+                {selectedTask.prompt}
+              </div>
               
-              <div className="flex flex-wrap gap-2 pt-2">
-                <span className="text-xs text-slate-400">Быстрый подставной пример:</span>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="text-xs text-slate-400">Тест:</span>
                 <button
                   onClick={() => setInputText(selectedTask.badExample)}
                   className="text-xs text-amber-400 hover:underline"
@@ -163,18 +174,18 @@ export default function OgeTrainerPage() {
                   onClick={() => setInputText(selectedTask.goodExample)}
                   className="text-xs text-emerald-400 hover:underline"
                 >
-                  + Образцовый
+                  + Идеальный
                 </button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-400">Ваш ответ:</label>
+              <label className="text-sm font-medium text-slate-400">Ответ ученика:</label>
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Вставьте или напишите сюда ответ ученика..."
-                rows={10}
+                placeholder="Вставьте или напишите сюда ответ..."
+                rows={9}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none font-mono text-sm"
               />
             </div>
@@ -195,12 +206,11 @@ export default function OgeTrainerPage() {
             </button>
           </section>
 
-          {/* Правая колонка: Результаты проверки */}
+          {/* Результаты */}
           <section className="space-y-4">
             {evaluation ? (
-              <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-6 space-y-6 animate-in fade-in duration-300">
+              <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-6 space-y-6">
                 
-                {/* Итоговый балл */}
                 <div className="flex justify-between items-center border-b border-slate-700 pb-4">
                   <div>
                     <h3 className="text-sm font-medium text-slate-400">Итоговая оценка</h3>
@@ -208,7 +218,7 @@ export default function OgeTrainerPage() {
                       {evaluation.totalScore} <span className="text-slate-500 text-lg">/ {evaluation.maxScore} баллов</span>
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div>
                     <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
                       evaluation.totalScore === evaluation.maxScore 
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
@@ -219,7 +229,6 @@ export default function OgeTrainerPage() {
                   </div>
                 </div>
 
-                {/* Резюме */}
                 <div className="space-y-1">
                   <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Резюме проверки</h4>
                   <p className="text-sm text-slate-300 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
@@ -227,7 +236,6 @@ export default function OgeTrainerPage() {
                   </p>
                 </div>
 
-                {/* Оценка по критериям */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Детализация по критериям ФИПИ</h4>
                   <div className="space-y-2">
@@ -243,17 +251,16 @@ export default function OgeTrainerPage() {
                   </div>
                 </div>
 
-                           {/* Ошибки и Рекомендации */}
-                           {(evaluation.errorsFound?.length ?? 0) > 0 && (
-                             <div className="space-y-2">
-                               <h4 className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Найденные недочеты</h4>
-                               <ul className="list-disc list-inside text-xs text-rose-300/90 space-y-1 bg-rose-950/20 p-3 rounded-lg border border-rose-900/30">
-                                 {evaluation.errorsFound?.map((err, idx) => (
-                                   <li key={idx}>{err}</li>
-                                 ))}
-                               </ul>
-                             </div>
-                           )}
+                {(evaluation.errorsFound?.length ?? 0) > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Найденные недочеты</h4>
+                    <ul className="list-disc list-inside text-xs text-rose-300/90 space-y-1 bg-rose-950/20 p-3 rounded-lg border border-rose-900/30">
+                      {evaluation.errorsFound?.map((err, idx) => (
+                        <li key={idx}>{err}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div className="space-y-1">
                   <h4 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Совет эксперта</h4>
@@ -270,7 +277,7 @@ export default function OgeTrainerPage() {
                 </div>
                 <div>
                   <p className="font-medium text-slate-400">Результат проверки появится здесь</p>
-                  <p className="text-xs text-slate-600 mt-1">Выберите пример или введите текст ответа и нажмите «Проверить»</p>
+                  <p className="text-xs text-slate-600 mt-1">Выберите задание или нажмите «🎲 Случайное задание»</p>
                 </div>
               </div>
             )}
