@@ -1,0 +1,352 @@
+[
+  {
+    "id": "ru-13.3-1",
+    "title": "13.3 — Настоящее искусство (по Ю.О. Домбровскому)",
+    "maxScore": 20,
+    "good": {
+      "runs": [
+        {
+          "score": 20,
+          "maxScore": 20,
+          "errors": 0
+        },
+        {
+          "score": 20,
+          "maxScore": 20,
+          "errors": 0
+        }
+      ],
+      "min": 20,
+      "max": 20,
+      "avg": 20,
+      "stdev": 0
+    },
+    "bad": {
+      "runs": [
+        {
+          "score": 9,
+          "maxScore": 20,
+          "errors": 11
+        },
+        {
+          "score": 10,
+          "maxScore": 20,
+          "errors": 11
+        }
+      ],
+      "min": 9,
+      "max": 10,
+      "avg": 9.5,
+      "stdev": 0.5
+    },
+    "verdict": "WARN",
+    "notes": [
+      "⚠️  badExample: средний балл 9.5 > 8.0"
+    ]
+  },
+  {
+    "id": "ru-13.3-2",
+    "title": "13.3 — Помощь в беде (по Л.Ф. Воронковой)",
+    "maxScore": 20,
+    "good": {
+      "runs": [
+        {
+          "score": 20,
+          "maxScore": 20,
+          "errors": 0
+        },
+        {
+          "score": 20,
+          "maxScore": 20,
+          "errors": 0
+        }
+      ],
+      "min": 20,
+      "max": 20,
+      "avg": 20,
+      "stdev": 0
+    },
+    "bad": {
+      "runs": [
+        {
+          "score": 0,
+          "maxScore": 20,
+          "errors": 1
+        },
+        {
+          "score": 0,
+          "maxScore": 20,
+          "errors": 1
+        }
+      ],
+      "min": 0,
+      "max": 0,
+      "avg": 0,
+      "stdev": 0
+    },
+    "verdict": "OK",
+    "notes": []
+  },
+  {
+    "id": "ru-13.3-3",
+    "title": "13.3 — Проявление доброты (по Ю. Яковлеву)",
+    "maxScore": 20,
+    "good": {
+      "runs": [
+        {
+          "score": 20,
+          "maxScore": 20,
+          "errors": 0
+        },
+        {
+          "score": 20,
+          "maxScore": 20,
+          "errors": 0
+        }
+      ],
+      "min": 20,
+      "max": 20,
+      "avg": 20,
+      "stdev": 0
+    },
+    "bad": {
+      "runs": [
+        {
+          "score": 0,
+          "maxScore": 20,
+          "errors": 6
+        },
+        {
+          "score": 0,
+          "maxScore": 20,
+          "errors": 10
+        }
+      ],
+      "min": 0,
+      "max": 0,
+      "avg": 0,
+      "stdev": 0
+    },
+    "verdict": "OK",
+    "notes": []
+  },
+  {
+    "id": "math-20-1",
+    "title": "Задание 20 — Кубическое уравнение",
+    "maxScore": 2,
+    "good": {
+      "runs": [
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        },
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        }
+      ],
+      "min": 2,
+      "max": 2,
+      "avg": 2,
+      "stdev": 0
+    },
+    "bad": {
+      "runs": [
+        {
+          "score": 0,
+          "maxScore": 2,
+          "errors": 3
+        },
+        {
+          "score": 0,
+          "maxScore": 2,
+          "errors": 2
+        }
+      ],
+      "min": 0,
+      "max": 0,
+      "avg": 0,
+      "stdev": 0
+    },
+    "verdict": "OK",
+    "notes": []
+  },
+  {
+    "id": "math-20-2",
+    "title": "Задание 20 — Уравнение с квадратами",
+    "maxScore": 2,
+    "good": {
+      "runs": [
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        },
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        }
+      ],
+      "min": 2,
+      "max": 2,
+      "avg": 2,
+      "stdev": 0
+    },
+    "bad": {
+      "runs": [
+        {
+          "score": 1,
+          "maxScore": 2,
+          "errors": 1
+        },
+        {
+          "score": 1,
+          "maxScore": 2,
+          "errors": 1
+        }
+      ],
+      "min": 1,
+      "max": 1,
+      "avg": 1,
+      "stdev": 0
+    },
+    "verdict": "WARN",
+    "notes": [
+      "⚠️  badExample: средний балл 1.0 > 0.8"
+    ]
+  },
+  {
+    "id": "math-20-3",
+    "title": "Задание 20 — Квадратное неравенство",
+    "maxScore": 2,
+    "good": {
+      "runs": [
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        },
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        }
+      ],
+      "min": 2,
+      "max": 2,
+      "avg": 2,
+      "stdev": 0
+    },
+    "bad": {
+      "runs": [
+        {
+          "score": 0,
+          "maxScore": 2,
+          "errors": 3
+        },
+        {
+          "score": 0,
+          "maxScore": 2,
+          "errors": 3
+        }
+      ],
+      "min": 0,
+      "max": 0,
+      "avg": 0,
+      "stdev": 0
+    },
+    "verdict": "OK",
+    "notes": []
+  },
+  {
+    "id": "math-20-4",
+    "title": "Задание 20 — Дробно-рациональное неравенство",
+    "maxScore": 2,
+    "good": {
+      "runs": [
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        },
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        }
+      ],
+      "min": 2,
+      "max": 2,
+      "avg": 2,
+      "stdev": 0
+    },
+    "bad": {
+      "runs": [
+        {
+          "score": 0,
+          "maxScore": 2,
+          "errors": 1
+        },
+        {
+          "score": 0,
+          "maxScore": 2,
+          "errors": 2
+        }
+      ],
+      "min": 0,
+      "max": 0,
+      "avg": 0,
+      "stdev": 0
+    },
+    "verdict": "OK",
+    "notes": []
+  },
+  {
+    "id": "math-20-5",
+    "title": "Задание 20 — Система уравнений",
+    "maxScore": 2,
+    "good": {
+      "runs": [
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        },
+        {
+          "score": 2,
+          "maxScore": 2,
+          "errors": 0
+        }
+      ],
+      "min": 2,
+      "max": 2,
+      "avg": 2,
+      "stdev": 0
+    },
+    "bad": {
+      "runs": [
+        {
+          "score": 1,
+          "maxScore": 2,
+          "errors": 2
+        },
+        {
+          "score": 1,
+          "maxScore": 2,
+          "errors": 2
+        }
+      ],
+      "min": 1,
+      "max": 1,
+      "avg": 1,
+      "stdev": 0
+    },
+    "verdict": "WARN",
+    "notes": [
+      "⚠️  badExample: средний балл 1.0 > 0.8"
+    ]
+  }
+]

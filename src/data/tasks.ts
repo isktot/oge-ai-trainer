@@ -13,6 +13,7 @@ export interface Task {
   criteria: Criterion[];
   goodExample: string;
   badExample: string;
+  correctAnswers?: string[];
 }
 
 const RU_CRITERIA: Criterion[] = [
@@ -157,6 +158,7 @@ export const TASKS: Task[] = [
     criteria: MATH_CRITERIA,
     goodExample: 'x³ - x² + 7x - 7 = 0\nx²(x - 1) + 7(x - 1) = 0\n(x - 1)(x² + 7) = 0\n1) x - 1 = 0 => x = 1\n2) x² + 7 = 0 => x² = -7 (действительных корней нет)\nОтвет: 1.',
     badExample: 'Разделим все на x:\nx² = x - 7 + 7/x\nx = 1\nОтвет: 1.',
+    correctAnswers: ['1', 'x=1', 'x₁=1'],
   },
   {
     id: 'math-20-2',
@@ -167,6 +169,7 @@ export const TASKS: Task[] = [
     criteria: MATH_CRITERIA,
     goodExample: '(2x - 3)² - (1 - 2x)² = 0\n((2x - 3) - (1 - 2x))((2x - 3) + (1 - 2x)) = 0\n(2x - 3 - 1 + 2x)(2x - 3 + 1 - 2x) = 0\n(4x - 4)(-2) = 0\n-8(x - 1) = 0\nx - 1 = 0 => x = 1\nОтвет: 1.',
     badExample: 'Извлекаем корень:\n2x - 3 = 1 - 2x\n4x = 4\nx = 1\nОтвет: 1.',
+    correctAnswers: ['1', 'x=1', 'x₁=1'],
   },
   {
     id: 'math-20-3',
@@ -177,6 +180,16 @@ export const TASKS: Task[] = [
     criteria: MATH_CRITERIA,
     goodExample: '2x² + 3x - 6x - 9 + 7 < 0\n2x² - 3x - 2 < 0\nНайдем корни уравнения 2x² - 3x - 2 = 0:\nD = 9 - 4*2*(-2) = 9 + 16 = 25\nx1 = (3 + 5)/4 = 2\nx2 = (3 - 5)/4 = -0.5\nМетодом интервалов получаем x ∈ (-0.5; 2).\nОтвет: (-0.5; 2).',
     badExample: 'x - 3 < -7 => x < -4\n2x + 3 < -7 => 2x < -10 => x < -5\nОтвет: x < -5.',
+    correctAnswers: [
+      '(-0.5;2)',
+      '(-0,5;2)',
+      '(-1/2;2)',
+      '(-0.5; 2)',
+      '-0.5<x<2',
+      '-0,5<x<2',
+      'x∈(-0.5;2)',
+      'x∈(-0,5;2)',
+    ],
   },
   {
     id: 'math-20-4',
@@ -187,6 +200,13 @@ export const TASKS: Task[] = [
     criteria: MATH_CRITERIA,
     goodExample: 'Так как числитель (-10) < 0, то дробь будет ≥ 0 тогда и только тогда, когда знаменатель строго меньше нуля:\n(x - 3)² - 5 < 0\n(x - 3 - √5)(x - 3 + √5) < 0\nКорни знаменателя: x = 3 - √5 и x = 3 + √5.\nМетодом интервалов: x ∈ (3 - √5; 3 + √5).\nОтвет: (3 - √5; 3 + √5).',
     badExample: 'Домножим на знаменатель:\n-10 ≥ 0\nЭто неверно, поэтому решений нет.\nОтвет: нет решений.',
+    correctAnswers: [
+      '(3-√5;3+√5)',
+      '(3-sqrt(5);3+sqrt(5))',
+      '(3-√5; 3+√5)',
+      '3-√5<x<3+√5',
+      'x∈(3-√5;3+√5)',
+    ],
   },
   {
     id: 'math-20-5',
@@ -197,5 +217,13 @@ export const TASKS: Task[] = [
     criteria: MATH_CRITERIA,
     goodExample: 'Сложим почленно оба уравнения системы:\n(x² + y) + (6x² - y) = 5 + 2\n7x² = 7\nx² = 1 => x1 = 1, x2 = -1.\n\nПодставим x в первое уравнение (y = 5 - x²):\n1) При x = 1: y = 5 - 1 = 4.\n2) При x = -1: y = 5 - 1 = 4.\nОтвет: (-1; 4), (1; 4).',
     badExample: 'y = 5 - x²\n6x² - 5 - x² = 2\n5x² = 7\nx = √(7/5)\nОтвет: √(7/5).',
+    correctAnswers: [
+      '(-1;4),(1;4)',
+      '(1;4),(-1;4)',
+      '(-1; 4), (1; 4)',
+      '(1; 4), (-1; 4)',
+      '(-1;4)(1;4)',
+      'x=-1,y=4;x=1,y=4',
+    ],
   },
 ];

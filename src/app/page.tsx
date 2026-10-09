@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { TASKS, Task } from '@/data/tasks'; // Подключаем задания из отдельного файла
+import { TASKS, Task } from '@/data/tasks';
 
 interface EvaluationResult {
   totalScore: number;
@@ -18,12 +18,18 @@ interface EvaluationResult {
   recommendations: string;
 }
 
+interface Progress {
+  percent: number;
+  message: string;
+}
+
 export default function OgeTrainerPage() {
   const [selectedSubject, setSelectedSubject] = useState<'Русский язык' | 'Математика'>('Русский язык');
   const [selectedTask, setSelectedTask] = useState<Task>(TASKS[0]);
   const [inputText, setInputText] = useState<string>('');
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
+  const [progress, setProgress] = useState<Progress>({ percent: 0, message: '' });
 
   const filteredTasks = TASKS.filter((t) => t.subject === selectedSubject);
 
@@ -33,6 +39,7 @@ export default function OgeTrainerPage() {
     setSelectedTask(firstTask);
     setEvaluation(null);
     setInputText('');
+    setProgress({ percent: 0, message: '' });
   };
 
   const handleRandomTask = () => {
@@ -42,6 +49,7 @@ export default function OgeTrainerPage() {
     setSelectedTask(random);
     setEvaluation(null);
     setInputText('');
+    setProgress({ percent: 0, message: '' });
   };
 
   const handleEvaluate = async () => {
@@ -52,6 +60,7 @@ export default function OgeTrainerPage() {
 
     setIsEvaluating(true);
     setEvaluation(null);
+    setProgress({ percent: 0, message: 'Подготовка…' });
 
     try {
       const res = await fetch('/api/check', {
@@ -63,13 +72,62 @@ export default function OgeTrainerPage() {
         }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || `Ошибка сервера (${res.status})`);
+      if (!res.ok || !res.body) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(errText || `Ошибка сервера (${res.status})`);
       }
 
-      setEvaluation(data);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let receivedResult = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Разбиваем поток SSE по двойному переводу строки
+        const events = buffer.split('\n\n');
+        buffer = events.pop() ?? '';
+
+        for (const block of events) {
+          const lines = block.split('\n');
+          let eventType = 'message';
+          let dataLine = '';
+          for (const line of lines) {
+            if (line.startsWith('event: ')) eventType = line.slice(7).trim();
+            else if (line.startsWith('data: ')) dataLine = line.slice(6);
+          }
+          if (!dataLine) continue;
+
+          let payload: any;
+          try {
+            payload = JSON.parse(dataLine);
+          } catch {
+            continue;
+          }
+
+          if (eventType === 'progress') {
+            setProgress({
+              percent: payload.percent ?? 0,
+              message: payload.message ?? '',
+            });
+          } else if (eventType === 'result') {
+            receivedResult = true;
+            setEvaluation(payload);
+          } else if (eventType === 'error') {
+            throw new Error(payload.message || 'Ошибка сервера');
+          }
+        }
+      }
+
+      if (!receivedResult) {
+        throw new Error('Сервер не вернул результат проверки.');
+      }
+
+      setProgress({ percent: 100, message: 'Готово' });
     } catch (err: any) {
       console.error(err);
       alert(`Ошибка проверки: ${err.message}`);
@@ -81,8 +139,6 @@ export default function OgeTrainerPage() {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-4 md:p-8 font-sans">
       <div className="max-w-5xl mx-auto space-y-6">
-        
-        {/* Шапка */}
         <header className="border-b border-slate-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <span className="bg-blue-600/20 text-blue-400 text-xs font-semibold px-2.5 py-1 rounded border border-blue-500/30">
@@ -110,7 +166,6 @@ export default function OgeTrainerPage() {
           </div>
         </header>
 
-        {/* Переключатель заданий */}
         <div className="bg-slate-800/40 border border-slate-700/50 p-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex-1 space-y-1">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
@@ -145,9 +200,7 @@ export default function OgeTrainerPage() {
           </button>
         </div>
 
-        {/* Рабочая область */}
         <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
           <section className="space-y-4">
             <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 space-y-3">
               <div className="flex justify-between items-center">
@@ -160,7 +213,7 @@ export default function OgeTrainerPage() {
               <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto pr-2 custom-scrollbar bg-slate-950/40 p-3 rounded-lg border border-slate-800">
                 {selectedTask.prompt}
               </div>
-              
+
               <div className="flex flex-wrap gap-2 pt-1">
                 <span className="text-xs text-slate-400">Тест:</span>
                 <button
@@ -196,54 +249,83 @@ export default function OgeTrainerPage() {
               className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20"
             >
               {isEvaluating ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>ИИ-Эксперт проверяет...</span>
-                </>
+                <span>Идёт проверка…</span>
               ) : (
                 <span>Проверить через ИИ-эксперта</span>
               )}
             </button>
+
+            {/* Прогресс-бар */}
+            {isEvaluating && (
+              <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 space-y-3">
+                <div className="flex justify-between text-xs text-slate-400">
+                  <span>{progress.message || 'Проверка…'}</span>
+                  <span className="font-mono">{progress.percent}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-500 ease-out"
+                    style={{ width: `${progress.percent}%` }}
+                  />
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Проверка может занять до минуты: выполняются несколько прогонов,
+                  между ними пауза из-за ограничения GigaChat API (1 поток).
+                </p>
+              </div>
+            )}
           </section>
 
-          {/* Результаты */}
           <section className="space-y-4">
             {evaluation ? (
               <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-6 space-y-6">
-                
                 <div className="flex justify-between items-center border-b border-slate-700 pb-4">
                   <div>
                     <h3 className="text-sm font-medium text-slate-400">Итоговая оценка</h3>
                     <p className="text-2xl font-bold text-white mt-1">
-                      {evaluation.totalScore} <span className="text-slate-500 text-lg">/ {evaluation.maxScore} баллов</span>
+                      {evaluation.totalScore}{' '}
+                      <span className="text-slate-500 text-lg">/ {evaluation.maxScore} баллов</span>
                     </p>
                   </div>
                   <div>
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                      evaluation.totalScore === evaluation.maxScore 
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                        : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                    }`}>
+                    <span
+                      className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                        evaluation.totalScore === evaluation.maxScore
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      }`}
+                    >
                       {Math.round((evaluation.totalScore / evaluation.maxScore) * 100)}% выполнения
                     </span>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Резюме проверки</h4>
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    Резюме проверки
+                  </h4>
                   <p className="text-sm text-slate-300 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
                     {evaluation.summary}
                   </p>
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Детализация по критериям ФИПИ</h4>
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    Детализация по критериям ФИПИ
+                  </h4>
                   <div className="space-y-2">
                     {evaluation.criteria.map((c, i) => (
-                      <div key={i} className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 space-y-1">
+                      <div
+                        key={i}
+                        className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 space-y-1"
+                      >
                         <div className="flex justify-between text-sm">
-                          <span className="font-semibold text-blue-400">{c.code}: {c.name}</span>
-                          <span className="font-mono text-slate-300">{c.score} / {c.maxScore}</span>
+                          <span className="font-semibold text-blue-400">
+                            {c.code}: {c.name}
+                          </span>
+                          <span className="font-mono text-slate-300">
+                            {c.score} / {c.maxScore}
+                          </span>
                         </div>
                         <p className="text-xs text-slate-400">{c.comment}</p>
                       </div>
@@ -253,7 +335,9 @@ export default function OgeTrainerPage() {
 
                 {(evaluation.errorsFound?.length ?? 0) > 0 && (
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Найденные недочеты</h4>
+                    <h4 className="text-xs font-semibold text-rose-400 uppercase tracking-wider">
+                      Найденные недочеты
+                    </h4>
                     <ul className="list-disc list-inside text-xs text-rose-300/90 space-y-1 bg-rose-950/20 p-3 rounded-lg border border-rose-900/30">
                       {evaluation.errorsFound?.map((err, idx) => (
                         <li key={idx}>{err}</li>
@@ -263,12 +347,13 @@ export default function OgeTrainerPage() {
                 )}
 
                 <div className="space-y-1">
-                  <h4 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Совет эксперта</h4>
+                  <h4 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+                    Совет эксперта
+                  </h4>
                   <p className="text-xs text-emerald-300/90 bg-emerald-950/20 p-3 rounded-lg border border-emerald-900/30">
                     {evaluation.recommendations}
                   </p>
                 </div>
-
               </div>
             ) : (
               <div className="h-full border-2 border-dashed border-slate-800 rounded-xl p-8 flex flex-col items-center justify-center text-center text-slate-500 space-y-3 min-h-[300px]">
@@ -277,12 +362,13 @@ export default function OgeTrainerPage() {
                 </div>
                 <div>
                   <p className="font-medium text-slate-400">Результат проверки появится здесь</p>
-                  <p className="text-xs text-slate-600 mt-1">Выберите задание или нажмите «🎲 Случайное задание»</p>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Выберите задание или нажмите «🎲 Случайное задание»
+                  </p>
                 </div>
               </div>
             )}
           </section>
-
         </main>
       </div>
     </div>
